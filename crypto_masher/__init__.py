@@ -121,6 +121,13 @@ class MASHER_BLOCK:
         size = struct.unpack("l", pb[:8])[0]
         eb = pb[8:(size+8)]
         return array2str(self.xor_data(eb, psk, ord))
+    def pretty_out(self, buf):
+        p = [buf[i:i+5] for i in range(0, len(buf), 5)]
+        for i in p:
+            for j in i:
+                print "%03d"%ord(j),
+            print
+        print
 
 
 
@@ -130,13 +137,14 @@ class MASHER_BLOCK:
 
 if __name__ == '__main__':
     psk = PSK(True)
-    key = psk.generate()
+    key = psk.generate(64)
     bad_key = psk.generate()
     print "PSK:",key
     msg = "Hello world!"
     print repr(msg)
-    b = MASHER_BLOCK(1024, True)
+    b = MASHER_BLOCK(20, True)
     out = b.crypt(msg,key)
+    b.pretty_out(out)
     f = open("/tmp/crypto.txt", "w")
     f.write(out)
     f.close()
