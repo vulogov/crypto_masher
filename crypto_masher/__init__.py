@@ -131,10 +131,6 @@ class MASHER_BLOCK:
 
 
 
-
-
-
-
 if __name__ == '__main__':
     psk = PSK(True)
     key = psk.generate(64)
