@@ -3,11 +3,12 @@
 ##
 import os
 import bitstring
+import numpy as np
 from six import print_ as print
 from six import raise_from
 from six import b
 
-class MasherError:
+class MasherError(BaseException):
     def __init__(self, *args):
         pass
 
@@ -18,31 +19,17 @@ class SYSTEM_RANDOM:
     def block(self, size):
         return os.urandom(size)
 
-class QUANTUM_RANDOM:
-    def __init__(self):
-        self.attempts = 10
-    def cmd(self, _cmd, args, kw):
-        c = 0
-        while True:
-            try:
-                return apply(_cmd, args, kw)
-            except:
-                c += 1
-            if c > self.attempts:
-                raise_from(MasherError(), "Can not get quantum random data")
+class NP_RANDOM:
     def randint(self, _min, _max):
-        import quantumrandom
-        return self.cmd(quantumrandom.randint, (), {"min":_min, "max":_max})
+        return np.random.randint(_min, _max)
     def block(self, size):
-        import quantumrandom
-        return self.cmd(quantumrandom.binary, (), {"array_length":1, "block_size":size})
+        return np.random.bytes(size)
 
 class RANDOM:
     def __init__(self, is_internal=False):
         if not is_internal:
             try:
-                import quantumrandom
-                self.r = QUANTUM_RANDOM()
+                self.r = NP_RANDOM()
             except ImportError:
                 self.r = SYSTEM_RANDOM()
         else:
