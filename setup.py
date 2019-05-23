@@ -11,6 +11,8 @@ setup(
     description='Slightly naive variable size block cipher',
     requires=[
         "quantumrandom",
+        "bitstring",
+        "six",
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',

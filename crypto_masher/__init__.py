@@ -3,6 +3,9 @@
 ##
 import os
 import bitstring
+from six import print_ as print
+from six import raise_from
+from six import b
 
 class MasherError:
     def __init__(self, *args):
@@ -22,13 +25,11 @@ class QUANTUM_RANDOM:
         c = 0
         while True:
             try:
-                print 1,_cmd,args,kw
                 return apply(_cmd, args, kw)
             except:
                 c += 1
             if c > self.attempts:
-                raise MasherError, "Can not get quantum random data"
-            print c
+                raise_from(MasherError(), "Can not get quantum random data")
     def randint(self, _min, _max):
         import quantumrandom
         return self.cmd(quantumrandom.randint, (), {"min":_min, "max":_max})
@@ -78,11 +79,12 @@ class MASHER_BLOCK:
             out.append(int(fun(c))^int(key[ix]))
             ix+=1
         return out
-    def make_block(self, b):
+    def make_block(self, buffer):
         import struct
-        if len(b)+8 > self.size:
-            raise ValueError, "Size of the buffer is larger than the size of the block"
-        nb = struct.pack("l", len(b))+b
+        if len(buffer)+8 > self.size:
+            raise_from(ValueError(),
+                "Size of the buffer is larger than the size of the block")
+        nb = b(struct.pack("l", len(buffer)))+b(buffer)
 
         _tail = self.rnd.block(self.size-len(nb))
         nb = nb+_tail
@@ -125,7 +127,7 @@ class MASHER_BLOCK:
         p = [buf[i:i+5] for i in range(0, len(buf), 5)]
         for i in p:
             for j in i:
-                print "%03d"%ord(j),
+                print("%03d"%ord(j),)
             print
         print
 
@@ -135,27 +137,23 @@ if __name__ == '__main__':
     psk = PSK(True)
     key = psk.generate(64)
     bad_key = psk.generate()
-    print "PSK:",key
+    print("PSK:",key)
     msg = "Hello world!"
-    print repr(msg)
+    print(repr(msg))
     b = MASHER_BLOCK(20, True)
     out = b.crypt(msg,key)
     b.pretty_out(out)
     f = open("/tmp/crypto.txt", "w")
     f.write(out)
     f.close()
-    print "Trying with bad key"
+    print("Trying with bad key")
     try:
         out_bad = b.decrypt(out, bad_key)
-        print repr(out_bad)
+        print(repr(out_bad))
         assert (msg == out_bad),"Decryption failed"
-    except AssertionError, _msg:
-        print _msg
-    print "Trying with good key"
+    except AssertionError as e:
+        print(e)
+    print("Trying with good key")
     out = b.decrypt(out, key)
-    print repr(out),repr(msg)
+    print(repr(out),repr(msg))
     assert (msg == out), "Decryption failed"
-
-
-
-
